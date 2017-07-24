@@ -48,57 +48,49 @@ namespace SaneAudioRenderer
             if (m_freshBuffer && !(sampleProps.dwSampleFlags & AM_SAMPLE_SPLICEPOINT))
             {
                 // Drop the sample.
-                DebugOut("SampleCorrection drop [", sampleProps.tStart, sampleProps.tStop, "]");
+                DebugOut(ClassName(this), "drop [", sampleProps.tStart, sampleProps.tStop, "]");
                 chunk = DspChunk();
                 assert(chunk.IsEmpty());
             }
         }
-        else if (m_lastFrameEnd == 0 && !realtimeDevice)
+        else if (!realtimeDevice && (m_lastFrameEnd == 0 || (sampleProps.dwSampleFlags & AM_SAMPLE_TIMEDISCONTINUITY)))
         {
-            if ((sampleProps.dwSampleFlags & AM_SAMPLE_STOPVALID) && sampleProps.tStop <= 0)
+            if ((sampleProps.dwSampleFlags & AM_SAMPLE_STOPVALID) && sampleProps.tStop <= m_lastFrameEnd)
             {
                 // Drop the sample.
-                DebugOut("SampleCorrection drop [", sampleProps.tStart, sampleProps.tStop, "]");
+                DebugOut(ClassName(this), "drop [", sampleProps.tStart, sampleProps.tStop, "]");
                 chunk = DspChunk();
                 assert(chunk.IsEmpty());
             }
-            else if ((sampleProps.dwSampleFlags & AM_SAMPLE_TIMEVALID) && sampleProps.tStart < 0)
+            else if ((sampleProps.dwSampleFlags & AM_SAMPLE_TIMEVALID) && sampleProps.tStart < m_lastFrameEnd)
             {
                 // Crop the sample.
-                const size_t cropFrames = (size_t)TimeToFrames(0 - sampleProps.tStart);
+                const size_t cropFrames = (size_t)TimeToFrames(m_lastFrameEnd - sampleProps.tStart);
 
                 if (cropFrames > 0)
                 {
-                    DebugOut("SampleCorrection crop", cropFrames, "frames from [",
+                    DebugOut(ClassName(this), "crop", cropFrames, "frames from [",
                              sampleProps.tStart, sampleProps.tStop, "]");
 
                     chunk.ShrinkHead(chunk.GetFrameCount() > cropFrames ? chunk.GetFrameCount() - cropFrames : 0);
+
+                    sampleProps.tStart += FramesToTime(cropFrames);
                 }
             }
-            else if ((sampleProps.dwSampleFlags & AM_SAMPLE_TIMEVALID) && sampleProps.tStart > 0)
+            else if ((sampleProps.dwSampleFlags & AM_SAMPLE_TIMEVALID) && sampleProps.tStart > m_lastFrameEnd)
             {
                 // Zero-pad the sample.
                 const size_t padFrames = (size_t)TimeToFrames(sampleProps.tStart - m_lastFrameEnd);
 
                 if (padFrames > 0 &&
-                    FramesToTime(padFrames) < 600 * OneSecond)
+                    FramesToTime(padFrames) < 10 * OneSecond)
                 {
-                    DebugOut("SampleCorrection pad", padFrames, "frames before [",
+                    DebugOut(ClassName(this), "pad", padFrames, "frames before [",
                              sampleProps.tStart, sampleProps.tStop, "]");
 
-                    DspChunk tempChunk(chunk.GetFormat(), chunk.GetChannelCount(),
-                                       chunk.GetFrameCount() + padFrames, chunk.GetRate());
+                    chunk.PadHead(padFrames);
 
-                    const size_t padBytes = padFrames * chunk.GetFrameSize();
-                    sampleProps.pbBuffer = nullptr;
-                    sampleProps.lActual += (int32_t)padBytes;
                     sampleProps.tStart -= FramesToTime(padFrames);
-
-                    assert(tempChunk.GetSize() == chunk.GetSize() + padBytes);
-                    ZeroMemory(tempChunk.GetData(), padBytes);
-                    memcpy(tempChunk.GetData() + padBytes, chunk.GetData(), chunk.GetSize());
-
-                    chunk = std::move(tempChunk);
                 }
             }
         }

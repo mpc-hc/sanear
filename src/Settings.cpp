@@ -84,12 +84,11 @@ namespace SaneAudioRenderer
         }
     }
 
-    STDMETHODIMP_(void) Settings::GetAllowBitstreaming(BOOL* pbAllowBitstreaming)
+    STDMETHODIMP_(BOOL) Settings::GetAllowBitstreaming()
     {
         CAutoLock lock(this);
 
-        if (pbAllowBitstreaming)
-            *pbAllowBitstreaming = m_allowBitstreaming;
+        return m_allowBitstreaming;
     }
 
     STDMETHODIMP_(void) Settings::SetCrossfeedEnabled(BOOL bEnable)
@@ -103,12 +102,11 @@ namespace SaneAudioRenderer
         }
     }
 
-    STDMETHODIMP_(void) Settings::GetCrossfeedEnabled(BOOL* pbEnabled)
+    STDMETHODIMP_(BOOL) Settings::GetCrossfeedEnabled()
     {
         CAutoLock lock(this);
 
-        if (pbEnabled)
-            *pbEnabled = m_crossfeedEnabled;
+        return m_crossfeedEnabled;
     }
 
     STDMETHODIMP Settings::SetCrossfeedSettings(UINT32 uCutoffFrequency, UINT32 uCrossfeedLevel)
@@ -143,5 +141,55 @@ namespace SaneAudioRenderer
 
         if (puCrossfeedLevel)
             *puCrossfeedLevel = m_crossfeedLevel;
+    }
+
+    STDMETHODIMP_(void) Settings::SetIgnoreSystemChannelMixer(BOOL bEnable)
+    {
+        CAutoLock lock(this);
+
+        if (m_ignoreSystemChannelMixer != bEnable)
+        {
+            m_ignoreSystemChannelMixer = bEnable;
+            m_serial++;
+        }
+    }
+
+    STDMETHODIMP_(BOOL) Settings::GetIgnoreSystemChannelMixer()
+    {
+        CAutoLock lock(this);
+
+        return m_ignoreSystemChannelMixer;
+    }
+
+    STDMETHODIMP Settings::SetTimestretchSettings(UINT32 uTimestretchMethod)
+    {
+        if (uTimestretchMethod != TIMESTRETCH_METHOD_SOLA &&
+            uTimestretchMethod != TIMESTRETCH_METHOD_PHASE_VOCODER)
+        {
+            return E_INVALIDARG;
+        }
+
+    #ifndef SANEAR_GPL_PHASE_VOCODER
+        if (uTimestretchMethod == TIMESTRETCH_METHOD_PHASE_VOCODER)
+            return E_NOTIMPL;
+    #endif
+
+        CAutoLock lock(this);
+
+        if (uTimestretchMethod != m_timestretchMethod)
+        {
+            m_timestretchMethod = uTimestretchMethod;
+            m_serial++;
+        }
+
+        return S_OK;
+    }
+
+    STDMETHODIMP_(void) Settings::GetTimestretchSettings(UINT32* puTimestretchMethod)
+    {
+        CAutoLock lock(this);
+
+        if (puTimestretchMethod)
+            *puTimestretchMethod = m_timestretchMethod;
     }
 }

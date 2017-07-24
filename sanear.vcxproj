@@ -98,6 +98,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="IGuidedReclock.h" />
+    <ClInclude Include="src\AudioDeviceEvent.h" />
+    <ClInclude Include="src\AudioDevicePush.h" />
     <ClInclude Include="src\AudioDevice.h" />
     <ClInclude Include="src\AudioDeviceManager.h" />
     <ClInclude Include="src\DspBalance.h" />
@@ -105,12 +108,12 @@
     <ClInclude Include="src\DspCrossfeed.h" />
     <ClInclude Include="src\DspDither.h" />
     <ClInclude Include="src\DspFormat.h" />
+    <ClInclude Include="src\DspTempo2.h" />
     <ClInclude Include="src\DspLimiter.h" />
     <ClInclude Include="src\DspMatrix.h" />
     <ClInclude Include="src\DspChunk.h" />
     <ClInclude Include="src\AudioRenderer.h" />
     <ClInclude Include="src\DspTempo.h" />
-    <ClInclude Include="src\DspRealtimeRate.h" />
     <ClInclude Include="src\DspVolume.h" />
     <ClInclude Include="src\Interfaces.h" />
     <ClInclude Include="src\MyBasicAudio.h" />
@@ -127,16 +130,17 @@
     <ClInclude Include="src\DspRate.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\AudioDevice.cpp" />
+    <ClCompile Include="src\AudioDeviceEvent.cpp" />
+    <ClCompile Include="src\AudioDevicePush.cpp" />
     <ClCompile Include="src\AudioDeviceManager.cpp" />
     <ClCompile Include="src\DspBalance.cpp" />
     <ClCompile Include="src\DspCrossfeed.cpp" />
     <ClCompile Include="src\DspDither.cpp" />
+    <ClCompile Include="src\DspTempo2.cpp" />
     <ClCompile Include="src\DspLimiter.cpp" />
     <ClCompile Include="src\DspMatrix.cpp" />
     <ClCompile Include="src\DspChunk.cpp" />
     <ClCompile Include="src\DspTempo.cpp" />
-    <ClCompile Include="src\DspRealtimeRate.cpp" />
     <ClCompile Include="src\DspVolume.cpp" />
     <ClCompile Include="src\MyBasicAudio.cpp" />
     <ClCompile Include="src\MyFilter.cpp" />

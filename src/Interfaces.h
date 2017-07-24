@@ -5,7 +5,7 @@
 
 namespace SaneAudioRenderer
 {
-    struct __declspec(uuid("6A5DD5AC-A1BF-4FB7-9C04-2A89970F8132"))
+    struct __declspec(uuid("ED41579C-C96A-4D8C-9813-856AB99F405E"))
     ISettings : IUnknown
     {
         STDMETHOD_(UINT32, GetSerial)() = 0;
@@ -20,10 +20,10 @@ namespace SaneAudioRenderer
         STDMETHOD(GetOuputDevice)(LPWSTR* ppDeviceId, BOOL* pbExclusive, UINT32* puBufferMS) = 0;
 
         STDMETHOD_(void, SetAllowBitstreaming)(BOOL bAllowBitstreaming) = 0;
-        STDMETHOD_(void, GetAllowBitstreaming)(BOOL* pbAllowBitstreaming) = 0;
+        STDMETHOD_(BOOL, GetAllowBitstreaming)() = 0;
 
         STDMETHOD_(void, SetCrossfeedEnabled)(BOOL bEnable) = 0;
-        STDMETHOD_(void, GetCrossfeedEnabled)(BOOL* pbEnabled) = 0;
+        STDMETHOD_(BOOL, GetCrossfeedEnabled)() = 0;
 
         enum
         {
@@ -38,6 +38,17 @@ namespace SaneAudioRenderer
         };
         STDMETHOD(SetCrossfeedSettings)(UINT32 uCutoffFrequency, UINT32 uCrossfeedLevel) = 0;
         STDMETHOD_(void, GetCrossfeedSettings)(UINT32* puCutoffFrequency, UINT32* puCrossfeedLevel) = 0;
+
+        STDMETHOD_(void, SetIgnoreSystemChannelMixer)(BOOL bEnable) = 0;
+        STDMETHOD_(BOOL, GetIgnoreSystemChannelMixer)() = 0;
+
+        enum
+        {
+            TIMESTRETCH_METHOD_SOLA = 0,
+            TIMESTRETCH_METHOD_PHASE_VOCODER = 1,
+        };
+        STDMETHOD(SetTimestretchSettings)(UINT32 uTimestretchMethod) = 0;
+        STDMETHOD_(void, GetTimestretchSettings)(UINT32* puTimestretchMethod) = 0;
     };
     _COM_SMARTPTR_TYPEDEF(ISettings, __uuidof(ISettings));
 

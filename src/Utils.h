@@ -15,6 +15,24 @@ namespace SaneAudioRenderer
 
     typedef std::shared_ptr<const WAVEFORMATEX> SharedWaveFormat;
 
+    inline size_t TimeToFrames(int64_t time, uint32_t rate)
+    {
+        assert(rate > 0);
+        return (size_t)(llMulDiv(time, rate, OneSecond, 0));
+    }
+
+    inline int64_t FramesToTime(size_t frames, uint32_t rate)
+    {
+        assert(rate > 0);
+        return llMulDiv(frames, OneSecond, rate, 0);
+    }
+
+    inline int64_t FramesToTimeLong(int64_t frames, uint32_t rate)
+    {
+        assert(rate > 0);
+        return llMulDiv(frames, OneSecond, rate, 0);
+    }
+
     inline void ThrowIfFailed(HRESULT result)
     {
         if (FAILED(result))
@@ -74,12 +92,6 @@ namespace SaneAudioRenderer
         const UINT m_period;
     };
 
-    template <typename... T>
-    inline std::array<typename std::common_type<T...>::type, sizeof...(T)> make_array(T&&... values)
-    {
-        return {std::forward<T>(values)...};
-    }
-
     inline std::wstring GetHexString(uint32_t number)
     {
         std::array<wchar_t, 11> temp;
@@ -95,21 +107,18 @@ namespace SaneAudioRenderer
         return SharedWaveFormat(reinterpret_cast<WAVEFORMATEX*>(pBuffer), AlignedFreeDeleter());
     }
 
-    namespace
-    {
-        inline void DebugOutForward(std::wostringstream&) {}
+    inline void DebugOutForward(std::wostringstream&) {}
 
-        template <typename T0, typename... T>
-        inline void DebugOutForward(std::wostringstream& stream, T0&& arg0, T&&... args)
-        {
-            stream << " " << arg0;
-            DebugOutForward(stream, std::forward<T>(args)...);
-        }
-    }
-    template <typename... T>
-    inline void DebugOut(T&&... args)
+    template <typename T0, typename... T>
+    inline void DebugOutForward(std::wostringstream& stream, T0&& arg0, T&&... args)
     {
-        #ifndef NDEBUG
+        stream << " " << arg0;
+        DebugOutForward(stream, std::forward<T>(args)...);
+    }
+
+    template <typename... T>
+    inline void DebugOutBody(T&&... args)
+    {
         try
         {
             std::wostringstream stream;
@@ -122,6 +131,53 @@ namespace SaneAudioRenderer
         {
             OutputDebugString(L"sanear: caught exception while formatting debug message");
         }
-        #endif
+    }
+
+    #ifndef NDEBUG
+    #   define DebugOut(...) DebugOutBody(##__VA_ARGS__)
+    #else
+    #   define DebugOut(...) {}
+    #endif
+
+    template <class T>
+    inline const char* ClassName(T* p)
+    {
+        const char* str = strrchr(typeid(*p).name(), ':');
+        return str ? str + 1 : "";
+    }
+
+    template <typename>
+    class WinapiFunc;
+    template <typename ReturnType, typename...Args>
+    class WinapiFunc<ReturnType WINAPI(Args...)> final
+    {
+    public:
+        typedef ReturnType(WINAPI* Func)(Args...);
+        WinapiFunc(LPCWSTR dll, LPCSTR func) { m_lib = LoadLibrary(dll); m_func = (Func)GetProcAddress(m_lib, func); }
+        WinapiFunc(const WinapiFunc&) = delete;
+        WinapiFunc& operator=(const WinapiFunc&) = delete;
+        ~WinapiFunc() { FreeLibrary(m_lib); }
+        explicit operator bool() const { return !!m_func; }
+        ReturnType operator()(Args...args) const { return m_func(args...); }
+    private:
+        HMODULE m_lib = NULL;
+        Func m_func = nullptr;
+    };
+
+    inline bool IsWindows7OrGreater()
+    {
+        OSVERSIONINFOEX info = {sizeof(info)};
+        info.dwMajorVersion = 6;
+        info.dwMinorVersion = 1;
+        auto rule = VerSetConditionMask(VerSetConditionMask(0, VER_MAJORVERSION, VER_GREATER_EQUAL),
+                                                               VER_MINORVERSION, VER_GREATER_EQUAL);
+        return !!VerifyVersionInfo(&info, VER_MAJORVERSION | VER_MINORVERSION, rule);
+    }
+
+    template <typename... T>
+    inline HRESULT WaitForAny(DWORD timeout, T&... objects)
+    {
+        std::array<HANDLE, sizeof...(objects)> handles = {objects...};
+        return WaitForMultipleObjects(sizeof...(objects), handles.data(), FALSE, timeout);
     }
 }

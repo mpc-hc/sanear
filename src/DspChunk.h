@@ -10,6 +10,9 @@ namespace SaneAudioRenderer
 
         static void ToFormat(DspFormat format, DspChunk& chunk);
         static void ToFloat(DspChunk& chunk) { ToFormat(DspFormat::Float, chunk); }
+        static void ToDouble(DspChunk& chunk) { ToFormat(DspFormat::Double, chunk); }
+
+        static void MergeChunks(DspChunk& chunk, DspChunk& appendage);
 
         DspChunk();
         DspChunk(DspFormat format, uint32_t channels, size_t frames, uint32_t rate);
@@ -30,6 +33,9 @@ namespace SaneAudioRenderer
         size_t GetFrameCount()     const { assert(m_channels != 0); return GetSampleCount() / m_channels; }
 
         char* GetData() { return (m_mediaSample ? m_mediaData : m_data.get()) + m_dataOffset; }
+
+        void PadTail(size_t padFrames);
+        void PadHead(size_t padFrames);
 
         void ShrinkTail(size_t toFrames);
         void ShrinkHead(size_t toFrames);

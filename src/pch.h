@@ -8,6 +8,7 @@
 
 #include <streams.h>
 
+#include <avrt.h>
 #include <audioclient.h>
 #include <comdef.h>
 #include <malloc.h>
@@ -38,6 +39,7 @@ namespace SaneAudioRenderer
     _COM_SMARTPTR_TYPEDEF(IMMDeviceEnumerator, __uuidof(IMMDeviceEnumerator));
     _COM_SMARTPTR_TYPEDEF(IMMDeviceCollection, __uuidof(IMMDeviceCollection));
     _COM_SMARTPTR_TYPEDEF(IMMDevice, __uuidof(IMMDevice));
+    _COM_SMARTPTR_TYPEDEF(IMMNotificationClient, __uuidof(IMMNotificationClient));
 
     _COM_SMARTPTR_TYPEDEF(IAudioClient, __uuidof(IAudioClient));
     _COM_SMARTPTR_TYPEDEF(IAudioRenderClient, __uuidof(IAudioRenderClient));

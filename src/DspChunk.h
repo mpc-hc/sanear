@@ -12,7 +12,7 @@ namespace SaneAudioRenderer
         static void ToFloat(DspChunk& chunk) { ToFormat(DspFormat::Float, chunk); }
         static void ToDouble(DspChunk& chunk) { ToFormat(DspFormat::Double, chunk); }
 
-        static void MergeChunks(DspChunk& chunk, DspChunk& appendage);
+        static void MergeChunks(DspChunk& chunk, DspChunk&& appendage);
 
         DspChunk();
         DspChunk(DspFormat format, uint32_t channels, size_t frames, uint32_t rate);

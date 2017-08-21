@@ -201,7 +201,7 @@ namespace SaneAudioRenderer
                                tailChunk.GetData(), outputDo, &outputDone);
             tailChunk.ShrinkTail(outputDone);
 
-            DspChunk::MergeChunks(output, tailChunk);
+            DspChunk::MergeChunks(output, std::move(tailChunk));
 
             if (outputDone < outputDo)
                 break;
@@ -222,7 +222,7 @@ namespace SaneAudioRenderer
             auto& first = m_transitionChunks.first;
             auto& second = m_transitionChunks.second;
 
-            DspChunk::MergeChunks(first, processedChunk);
+            DspChunk::MergeChunks(first, std::move(processedChunk));
             assert(processedChunk.IsEmpty());
 
             if (m_soxrc)
@@ -246,7 +246,7 @@ namespace SaneAudioRenderer
             {
                 // Transitioning from pass-through to variable rate conversion.
                 m_transitionCorrelation = {};
-                DspChunk::MergeChunks(second, unprocessedChunk);
+                DspChunk::MergeChunks(second, std::move(unprocessedChunk));
             }
 
             // Cross-fade.

@@ -304,7 +304,7 @@ namespace SaneAudioRenderer
         }
     }
 
-    void DspChunk::MergeChunks(DspChunk& chunk, DspChunk& appendage)
+    void DspChunk::MergeChunks(DspChunk& chunk, DspChunk&& appendage)
     {
         if (!chunk.IsEmpty())
         {

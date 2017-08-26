@@ -257,6 +257,9 @@ namespace SaneAudioRenderer
                 {
                     CAutoLock threadLock(&m_threadMutex);
 
+                    if (m_awaitingRenew)
+                        continue;
+
                     assert(m_sentFrames > 0 || m_queuedStart);
 
                     try

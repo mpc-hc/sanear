@@ -20,7 +20,7 @@ namespace SaneAudioRenderer
     template <>
     struct DspFormatTraits<DspFormat::Pcm8>
     {
-        typedef int8_t SampleType;
+        typedef uint8_t SampleType;
     };
 
     template <>

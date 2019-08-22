@@ -29,39 +29,39 @@ namespace SaneAudioRenderer
                                          typename DspFormatTraits<OutputFormat>::SampleType& output);
 
         template <>
-        __forceinline void ConvertSample<DspFormat::Pcm8, DspFormat::Pcm8>(const int8_t& input, int8_t& output)
+        __forceinline void ConvertSample<DspFormat::Pcm8, DspFormat::Pcm8>(const uint8_t& input, uint8_t& output)
         {
             output = input;
         }
 
         template <>
-        __forceinline void ConvertSample<DspFormat::Pcm8, DspFormat::Pcm16>(const int8_t& input, int16_t& output)
+        __forceinline void ConvertSample<DspFormat::Pcm8, DspFormat::Pcm16>(const uint8_t& input, int16_t& output)
         {
-            output = (int16_t)input << 8;
+            output = ((int16_t)input - 0x80) << 8;
         }
 
         template <>
-        __forceinline void ConvertSample<DspFormat::Pcm8, DspFormat::Pcm24>(const int8_t& input, int24_t& output)
+        __forceinline void ConvertSample<DspFormat::Pcm8, DspFormat::Pcm24>(const uint8_t& input, int24_t& output)
         {
-            PackPcm24((int32_t)input << 24, output);
+            PackPcm24(((int32_t)input - 0x80) << 24, output);
         }
 
         template <>
-        __forceinline void ConvertSample<DspFormat::Pcm8, DspFormat::Pcm32>(const int8_t& input, int32_t& output)
+        __forceinline void ConvertSample<DspFormat::Pcm8, DspFormat::Pcm32>(const uint8_t& input, int32_t& output)
         {
-            output = (int32_t)input << 24;
+            output = ((int32_t)input - 0x80) << 24;
         }
 
         template <>
-        __forceinline void ConvertSample<DspFormat::Pcm8, DspFormat::Float>(const int8_t& input, float& output)
+        __forceinline void ConvertSample<DspFormat::Pcm8, DspFormat::Float>(const uint8_t& input, float& output)
         {
-            output = (float)input / ((int32_t)INT8_MAX + 1);
+            output = ((int32_t)input - 0x80) / ((float)INT8_MAX + 1);
         }
 
         template <>
-        __forceinline void ConvertSample<DspFormat::Pcm8, DspFormat::Double>(const int8_t& input, double& output)
+        __forceinline void ConvertSample<DspFormat::Pcm8, DspFormat::Double>(const uint8_t& input, double& output)
         {
-            output = (double)input / ((int32_t)INT8_MAX + 1);
+            output = ((int32_t)input - 0x80) / ((double)INT8_MAX + 1);
         }
 
         template <>
